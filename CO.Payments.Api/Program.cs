@@ -1,4 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using CO.Payments.Api.Data.Database;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<PaymentsDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PaymentsDbContext") ?? throw new InvalidOperationException("Connection string 'PaymentsDbContext' not found.")));
 
 // Add services to the container.
 
@@ -22,7 +27,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/api/healthchecks");
+app.MapHealthChecks("/api/healthcheck");
 
 app.Run();
 public partial class Program { }

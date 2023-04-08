@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using CO.Payments.Api.Data.Database;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 
 namespace CO.Payments.Api.Tests.Integration
 {
@@ -10,7 +12,7 @@ namespace CO.Payments.Api.Tests.Integration
         public PaymentsDbContext CreateContext()
         => new PaymentsDbContext(
             new DbContextOptionsBuilder<PaymentsDbContext>()
-                .UseSqlServer(ConnectionString)
+                .UseSqlite(ConnectionString)
                 .Options);
     }
 }
