@@ -6,6 +6,5 @@
         public string CardHolder { get; set; }
         public string Expiry { get; set; }
         public string Cvv { get; set; }
-        public string MerchantId { get; set; }
     }
 }

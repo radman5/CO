@@ -2,5 +2,6 @@
 {
     public class CreatePaymentTokenResponse
     {
+        public string Token { get; set; }
     }
 }
