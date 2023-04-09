@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using CO.Payments.Api.Data.Database;
-using CO.Payments.Api.TokenService;
+using CO.Payments.Api.Controllers.ExceptionHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PaymentsDbContext>(options =>
@@ -8,13 +8,14 @@ builder.Services.AddDbContext<PaymentsDbContext>(options =>
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{ 
+    options.Filters.Add<HttpResponseExceptionFilter>();
+});
 builder.Services.AddHealthChecks();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddSingleton<ITokenGenerator, TokenGenerator>();
 
 var app = builder.Build();
 

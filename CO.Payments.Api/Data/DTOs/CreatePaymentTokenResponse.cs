@@ -1,7 +1,6 @@
-﻿namespace CO.Payments.Api.Data.DTOs
+﻿namespace CO.Payments.Api.Data.DTOs;
+
+public class CreatePaymentTokenResponse
 {
-    public class CreatePaymentTokenResponse
-    {
-        public string Token { get; set; }
-    }
+    public string Token { get; set; }
 }

@@ -8,118 +8,117 @@ using System.Drawing.Text;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace CO.Payments.Api.Tests.Integration.PaymentTokenController
+namespace CO.Payments.Api.Tests.Integration.PaymentTokenController;
+
+public class DeletePaymentTokenTests
+    : IClassFixture<DbContextWebApplicationFactory<Program>>
 {
-    public class DeletePaymentTokenTests
-        : IClassFixture<DbContextWebApplicationFactory<Program>>
+    private readonly DbContextWebApplicationFactory<Program> _factory;
+    private readonly PaymentsDbContext _db;
+    private readonly Fixture _fixture;
+
+    private const string MerchantIdHeader = "MerchantId";
+
+    public DeletePaymentTokenTests(DbContextWebApplicationFactory<Program> factory)
     {
-        private readonly DbContextWebApplicationFactory<Program> _factory;
-        private readonly PaymentsDbContext _db;
-        private readonly Fixture _fixture;
+        _factory = factory;
+        _db = _factory.CreateContext();
+        _fixture= new Fixture();
+    }
 
-        private const string MerchantIdHeader = "MerchantId";
+    [Fact]
+    public async Task ValidRequest_ShouldReturnNoContent_ShouldDeleteCardDetails()
+    {
+        // Arrange
+        var merchant = _fixture.Create<MerchantPaymentProfile>();
+        var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
 
-        public DeletePaymentTokenTests(DbContextWebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-            _db = _factory.CreateContext();
-            _fixture= new Fixture();
-        }
+        await _db.Merchants.AddAsync(merchant);
+        await _db.CardDetails.AddAsync(cardDetailsToDelete);
+        await _db.SaveChangesAsync();
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Add(MerchantIdHeader, merchant.MerchantId.ToString());
 
-        [Fact]
-        public async Task ValidRequest_ShouldReturnNoContent_ShouldDeleteCardDetails()
-        {
-            // Arrange
-            var merchant = _fixture.Create<MerchantPaymentProfile>();
-            var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
+        // Pre Assert
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeTrue();
 
-            await _db.Merchants.AddAsync(merchant);
-            await _db.CardDetails.AddAsync(cardDetailsToDelete);
-            await _db.SaveChangesAsync();
-            var client = _factory.CreateClient();
-            client.DefaultRequestHeaders.Add(MerchantIdHeader, merchant.MerchantId.ToString());
+        // Act
+        var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
 
-            // Pre Assert
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeTrue();
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeFalse();
+    }
 
-            // Act
-            var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
+    [Fact]
+    public async Task MissingMerchantIdHeader_ShouldReturnBadRequest_ShouldNotDeleteCardDetails()
+    {
+        // Arrange
+        var merchant = _fixture.Create<MerchantPaymentProfile>();
+        var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeFalse();
-        }
+        await _db.Merchants.AddAsync(merchant);
+        await _db.CardDetails.AddAsync(cardDetailsToDelete);
+        await _db.SaveChangesAsync();
+        var client = _factory.CreateClient();
 
-        [Fact]
-        public async Task MissingMerchantIdHeader_ShouldReturnBadRequest_ShouldNotDeleteCardDetails()
-        {
-            // Arrange
-            var merchant = _fixture.Create<MerchantPaymentProfile>();
-            var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
+        // Pre Assert
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeTrue();
 
-            await _db.Merchants.AddAsync(merchant);
-            await _db.CardDetails.AddAsync(cardDetailsToDelete);
-            await _db.SaveChangesAsync();
-            var client = _factory.CreateClient();
+        // Act
+        var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
 
-            // Pre Assert
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeTrue();
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeTrue();
+    }
 
-            // Act
-            var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
+    [Fact]
+    public async Task MerchantDoesntExist_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var merchant = _fixture.Create<MerchantPaymentProfile>();
+        var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeTrue();
-        }
+        await _db.Merchants.AddAsync(merchant);
+        await _db.CardDetails.AddAsync(cardDetailsToDelete);
+        await _db.SaveChangesAsync();
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Add(MerchantIdHeader, "doesntexist");
 
-        [Fact]
-        public async Task MerchantDoesntExist_ShouldReturnBadRequest()
-        {
-            // Arrange
-            var merchant = _fixture.Create<MerchantPaymentProfile>();
-            var cardDetailsToDelete = _fixture.Build<CardDetails>().With(x => x.MerchantId, merchant.MerchantId).Create();
+        // Pre Assert
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeTrue();
 
-            await _db.Merchants.AddAsync(merchant);
-            await _db.CardDetails.AddAsync(cardDetailsToDelete);
-            await _db.SaveChangesAsync();
-            var client = _factory.CreateClient();
-            client.DefaultRequestHeaders.Add(MerchantIdHeader, "doesntexist");
+        // Act
+        var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
 
-            // Pre Assert
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeTrue();
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        _db.CardDetails.Any(
+            x => x.CardNumber == cardDetailsToDelete.CardNumber)
+            .Should().BeTrue();
+    }
 
-            // Act
-            var response = await client.DeleteAsync($"/api/paymenttoken/{cardDetailsToDelete.Token}");
+    [Fact]
+    public async Task WithNoUrlParameter_ShouldReturnMethodNotAllowed()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            _db.CardDetails.Any(
-                x => x.CardNumber == cardDetailsToDelete.CardNumber)
-                .Should().BeTrue();
-        }
+        // Act
+        var response = await client.DeleteAsync($"/api/paymenttoken/");
 
-        [Fact]
-        public async Task WithNoUrlParameter_ShouldReturnMethodNotAllowed()
-        {
-            // Arrange
-            var client = _factory.CreateClient();
-
-            // Act
-            var response = await client.DeleteAsync($"/api/paymenttoken/");
-
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
-        }
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
     }
 }

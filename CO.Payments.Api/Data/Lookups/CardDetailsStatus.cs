@@ -1,9 +1,8 @@
-﻿namespace CO.Payments.Api.Data.Lookups
+﻿namespace CO.Payments.Api.Data.Lookups;
+
+public enum CardDetailsStatus
 {
-    public enum CardDetailsStatus
-    {
-        Pending,
-        Used,
-        Expired
-    }
+    Pending,
+    Used,
+    Expired
 }
