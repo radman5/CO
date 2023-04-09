@@ -59,7 +59,6 @@ You can run the tests using the built in Visual Studio Test Explorer/Runner
  - Move PaymentDb definition to another repo.
    - Will need to publish the paymentDb as a docker container to a shared image repository like artifactory to be consumed by paymentDb integration tests.
  - Add batect to manage a local dev environment with depencies like PaymentDb
- - Add 
  
 ## Architecture
 ###  Cloud infrastructure considerations
