@@ -3,10 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using CO.Payments.Api.Data.Database;
 using CO.Payments.Api.Data.DbModels;
 using CO.Payments.Api.Data.DTOs;
-using System.Linq;
 using System.Net;
 using CO.Payments.Api.Controllers.ExceptionHandling;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using CO.Payments.Api.Services;
 
 namespace CO.Payments.Api.Controllers;
 
@@ -15,10 +14,12 @@ namespace CO.Payments.Api.Controllers;
 public class PaymentsController : MerchantControllerBase
 {
     private readonly PaymentsDbContext _context;
+    private readonly IPaymentService _paymentService;
 
-    public PaymentsController(PaymentsDbContext context)
+    public PaymentsController(PaymentsDbContext context, IPaymentService paymentService)
     {
         _context = context;
+        _paymentService = paymentService;
     }
 
     // GET: api/Payments
@@ -43,8 +44,8 @@ public class PaymentsController : MerchantControllerBase
     {
         await ValidateMerchantExists(_context, Request, merchantId);
 
-        var payment = await _context.Payments.SingleOrDefaultAsync(x => 
-            x.PaymentReference == paymentReference && 
+        var payment = await _context.Payments.SingleOrDefaultAsync(x =>
+            x.PaymentReference == paymentReference &&
             x.MerchantId == merchantId);
 
         if (payment == null)
@@ -59,26 +60,8 @@ public class PaymentsController : MerchantControllerBase
     [HttpPost]
     public async Task<ActionResult<Payment>> MakePayment(MakePaymentRequest makePaymentRequest, [FromHeader] long merchantId)
     {
-        await ValidateMerchantExists(_context, Request, merchantId);
-
-        var newPayment = await CreateNewPayment(makePaymentRequest, merchantId);
-        _context.Payments.Add(newPayment);
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            if (PaymentExists(newPayment.PaymentReference))
-            {
-                return Conflict();
-            }
-            else
-            {
-                throw;
-            }
-        }
+        var newPayment = await _paymentService
+            .MakePaymentToAquiringBank(makePaymentRequest, merchantId);
 
         return CreatedAtAction(
             "GetPayment",

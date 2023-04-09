@@ -7,16 +7,16 @@ namespace CO.Payments.Api.Data.DbModels;
 public class Payment
 {
     [Key]
-    public string PaymentReference { get; set; }
-    public PaymentStatus PaymentStatus { get; set; }
-    public string StatusReason { get; set; }
-    public decimal Amount { get; set; }
-    public string Currency { get; set; }
-    public string EndOfCardNumber { get; set; }
-    public string CardExpiry { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? ProcessedAt { get; set; }
-    public long MerchantId { get; set; }
+    public string PaymentReference { get; private set; }
+    public PaymentStatus PaymentStatus { get; private set; }
+    public string StatusReason { get; private set; }
+    public decimal Amount { get; private set; }
+    public string Currency { get; private set; }
+    public string EndOfCardNumber { get; private set; }
+    public string CardExpiry { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? ProcessedAt { get; private set; }
+    public long MerchantId { get; private set; }
 
     internal static Payment Create(MakePaymentRequest payment, long merchantId, CardDetails cardDetails)
     {
@@ -31,5 +31,15 @@ public class Payment
             CreatedAt = DateTime.UtcNow,
             MerchantId = merchantId,
         };
+    }
+
+    internal void SetToProcessed(BankPaymentResponse bankPaymentResponse)
+    {
+        PaymentStatus = bankPaymentResponse.ResultType == 
+            PaymentResult.Approved ? 
+                PaymentStatus.Success : 
+                PaymentStatus.Failed;
+        StatusReason = bankPaymentResponse.Message;
+        ProcessedAt = DateTime.UtcNow;
     }
 }
