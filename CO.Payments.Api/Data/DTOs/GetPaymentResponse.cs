@@ -1,18 +1,25 @@
 ﻿using CO.Payments.Api.Data.DbModels;
+using Newtonsoft.Json;
 
 namespace CO.Payments.Api.Data.DTOs;
 
 public class GetPaymentResponse
 {
-    public string PaymentReference { get; private set; }
-    public string Status { get; private set; }
-    public string StatusReason { get; private set; }
-    public decimal Amount { get; private set; }
-    public string Currency { get; private set; }
-    public string EndOfCardNumber { get; private set; }
-    public string CardExpiry { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? ProcessedAt { get; private set; }
+    public string PaymentReference { get; set; }
+
+    public string Status { get; set; }
+
+    public string StatusReason { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; }
+    public string EndOfCardNumber { get; set; }
+    public string CardExpiry { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? ProcessedAt { get; set; }
+
+    public GetPaymentResponse() { }
 
     public GetPaymentResponse(Payment payment)
     {

@@ -38,7 +38,7 @@ namespace CO.Payments.Api.Services
             cardDetails.Use(); // CardDetails are single use, make sure to mark them as used
 
             var newPayment = Payment.Create(makePaymentRequest, merchant.MerchantId, cardDetails);
-
+            await _db.Payments.AddAsync(newPayment);
             await _db.SaveChangesAsync();
 
             var bankPaymentResponse = _bankService.MakePayment(BankPaymentRequest.Create(makePaymentRequest, cardDetails));

@@ -6,15 +6,15 @@ namespace CO.Payments.Api.Data.DbModels;
 public class CardDetails
 {
     [Key]
-    public string Token { get; private set; }
-    public string CardNumber { get; private set; }
-    public string CardHolder { get; private set; }
-    public string Expiry { get; private set; }
-    public string Cvv { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UsedAt { get; private set; }
-    public CardDetailsStatus Status { get; private set; }
-    public long MerchantId { get; private set; }
+    public string Token { get; set; }
+    public string CardNumber { get; set; }
+    public string CardHolder { get; set; }
+    public string Expiry { get; set; }
+    public string Cvv { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UsedAt { get; set; }
+    public CardDetailsStatus Status { get; set; }
+    public long MerchantId { get; set; }
 
     public static CardDetails Create(string cardNumber, string cardHolderName, string expiryDate, string cvv, long merchantId)
     {
@@ -31,7 +31,7 @@ public class CardDetails
         };
     }
 
-    internal void Use()
+    public void Use()
     {
         Status = CardDetailsStatus.Used;
         UsedAt = DateTime.UtcNow;

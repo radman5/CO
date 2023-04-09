@@ -25,3 +25,8 @@ public class CKOBankService : IBankService
         };
     }
 }
+
+public interface IBankService
+{
+    BankPaymentResponse MakePayment(BankPaymentRequest request);
+}

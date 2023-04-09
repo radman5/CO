@@ -56,6 +56,22 @@ public class PaymentsController : MerchantControllerBase
         return new GetPaymentResponse(payment);
     }
 
+    /// <summary>
+    /// Takes a payment token, amount and currency to make an payment to the aquiring bank
+    /// </summary>
+    /// <param name="makePaymentRequest"></param>
+    /// <param name="merchantId"></param>
+    /// <returns>The payment details</returns>
+    /// <remarks>
+    /// Sample request:
+    ///     POST /api/Payments
+    ///     {
+    ///         "token": "token",
+    ///         "amount": 100,
+    ///         "currecny": "GBP"
+    ///     }
+    ///     
+    /// </remarks>
     // POST: api/Payments
     [HttpPost]
     public async Task<ActionResult<Payment>> MakePayment(MakePaymentRequest makePaymentRequest, [FromHeader] long merchantId)
@@ -63,31 +79,16 @@ public class PaymentsController : MerchantControllerBase
         var newPayment = await _paymentService
             .MakePaymentToAquiringBank(makePaymentRequest, merchantId);
 
-        return CreatedAtAction(
-            "GetPayment",
-            new { id = newPayment.PaymentReference },
-            new GetPaymentResponse(newPayment));
-    }
-
-    private async Task<Payment> CreateNewPayment(MakePaymentRequest makePaymentRequest, long merchantId)
-    {
-        var merchant = await _context.Merchants.FindAsync(merchantId);
-
-        if (merchant != null)
+        if (newPayment.PaymentStatus == Data.Lookups.PaymentStatus.Success)
         {
-            var cardDetails = await _context.CardDetails.FindAsync(makePaymentRequest.Token);
-            if (cardDetails != null &&
-                cardDetails.Status == Data.Lookups.CardDetailsStatus.Pending)
-            {
-                cardDetails.Use(); // TODO: Think of a better place to do this
-                var newPayment = Payment.Create(makePaymentRequest, merchant.MerchantId, cardDetails);
-                return newPayment;
-            }
-
-            throw new HttpResponseException(HttpStatusCode.BadRequest, "Invalid payment token");
+            return CreatedAtAction(
+                "GetPayment",
+                new { id = newPayment.PaymentReference },
+                new GetPaymentResponse(newPayment)); 
+        } else
+        {
+            return UnprocessableEntity();
         }
-
-        throw new HttpResponseException(HttpStatusCode.BadRequest, "Merchant profile not found");
     }
 
     private bool PaymentExists(string id)
