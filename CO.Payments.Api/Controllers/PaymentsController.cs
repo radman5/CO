@@ -56,22 +56,7 @@ public class PaymentsController : MerchantControllerBase
         return new GetPaymentResponse(payment);
     }
 
-    /// <summary>
-    /// Takes a payment token, amount and currency to make an payment to the aquiring bank
-    /// </summary>
-    /// <param name="makePaymentRequest"></param>
-    /// <param name="merchantId"></param>
-    /// <returns>The payment details</returns>
-    /// <remarks>
-    /// Sample request:
-    ///     POST /api/Payments
-    ///     {
-    ///         "token": "token",
-    ///         "amount": 100,
-    ///         "currecny": "GBP"
-    ///     }
-    ///     
-    /// </remarks>
+    
     // POST: api/Payments
     [HttpPost]
     public async Task<ActionResult<Payment>> MakePayment(MakePaymentRequest makePaymentRequest, [FromHeader] long merchantId)

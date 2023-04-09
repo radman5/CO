@@ -3,8 +3,7 @@ using CO.Payments.Api.Data.DbModels;
 using CO.Payments.Api.Data.Database;
 using CO.Payments.Api.Data.DTOs;
 using Microsoft.EntityFrameworkCore;
-using CO.Payments.Api.Controllers.ExceptionHandling;
-using System.Net;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CO.Payments.Api.Controllers;
 
@@ -21,6 +20,8 @@ public class PaymentTokenController : MerchantControllerBase
 
     // POST: api/paymenttoken
     [HttpPost]
+    [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(CreatePaymentTokenResponse))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreatePaymentTokenResponse>> CreatePaymentToken(CreatePaymentTokenRequest request, [FromHeader] long merchantId)
     {
         await ValidateMerchantExists(_context, Request, merchantId);

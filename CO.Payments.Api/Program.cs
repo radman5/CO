@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using CO.Payments.Api.Data.Database;
 using CO.Payments.Api.Controllers.ExceptionHandling;
 using CO.Payments.Api.Services;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PaymentsDbContext>(options =>
@@ -16,7 +18,10 @@ builder.Services.AddControllers(options =>
 builder.Services.AddHealthChecks();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => {
+    options.ExampleFilters();
+});
+builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddSingleton<IBankService, CKOBankService>();
