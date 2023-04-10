@@ -10,7 +10,9 @@ public abstract class MerchantControllerBase : ControllerBase
 {
     protected static async Task ValidateMerchantExists(PaymentsDbContext _db, HttpRequest request, long merchantId)
     {
-        if (request.Headers.Any(h => h.Key == "MerchantId" && h.Value == merchantId.ToString()))
+        if (request.Headers.Any(h => 
+            h.Key.Equals("merchantid", StringComparison.InvariantCultureIgnoreCase) && 
+            h.Value.ToString().Equals(merchantId.ToString(), StringComparison.InvariantCultureIgnoreCase)))
         {
             var merchant = await _db.Merchants.FindAsync(merchantId);
             if (merchant == null)
