@@ -33,7 +33,7 @@ Make sure to follow the OpenApi docs, it has the contracts and examples ready to
       3. currencty eg "GBP"
 4. Payment will always be successful because you are rich!
 
-## How to make a Successful payment
+## How to make a failed payment
 
 To trigger a failed payment, request a payment token using CardNumber = "insuffientfunds"
 
