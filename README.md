@@ -5,6 +5,21 @@
    - The database is SQLite, will be migrated to Postgres once development has been completed
  - The integration tests spin up the API on a test web server and calls to it using an HttpClient.
 
+ ### Entities explained
+ 
+ - There a three entities in the system
+   - MerchantPaymentProfile
+      - This entity stores a reference to its account in the bank system
+      - Also has a reference to the merchants internal account id that is added as a header in the api gateway.
+         - This header is currently used to link the other resources to a merchant and as a second authorisation layer  ensuring a merchant only has access to resources it created 
+   - CardDetails
+      - This entity stores the credit card details (currently as plain text, encrypted in the future) and a randomly generated string called token.
+         - The token is passed back to the requesting merchant server and is used to reference the card details when making a payembt request
+      - CardDetails are currently single use ensuring you cannot accidentally make duplicate payment requests
+   - Payment
+      - This entity stores payment details and payment token
+      - Can be retrieved by the merchant 
+
 
 ### Prerequisites 
 1. Visual Studio 2022 (or any with .NET 7 support) 
