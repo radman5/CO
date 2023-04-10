@@ -68,7 +68,7 @@ You can run the tests using the built in Visual Studio Test Explorer/Runner
  - All APIs and Worker applications are .NET 7 applications deployed as separate services on a single kubernetes cluster.
 	 - I chose to host on a kubernetes cluster because it is cheaper to run than 
 	 - Within the cluster nginx ingress is used by the APIs to access and load balance the traffic to each service
- - All databases are Postgres on AWS Aurora
+ - I imagine the Api Gateway db would be a relational database so I would probably deploy it as a Postgres Db on AWS Aurora
 	 - I chose Aurora over RDS because of the managed scalability
-	 - Postgres over SQL Server because of the cost
-	 - RDBMS over dynamo because I have more experience with it, but can see areas where I might consider it.
+ - I chose dynamodb for the payment/merchant table because it seems like it would be a simple schema making a full relational database overkill
+ - I would make the card details table a dynamodb table with the actual card details being encrypted before saving to the table. 
